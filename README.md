@@ -1,2 +1,2 @@
-# AIHackathon
+# Zenith AI
 Encode AI Hackathon
