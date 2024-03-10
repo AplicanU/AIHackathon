@@ -180,11 +180,11 @@ async def download_pdf(action):
     # Save the PDF with the filename "report.pdf"
     pdf.output("report.pdf")
 
-    # pdf_url = "/report.pdf"
-    # response = requests.get(pdf_url)
+    pdf_url = "/report.pdf"
+    response = requests.get(pdf_url)
 
-    # with open("downloaded_report.pdf", "wb") as pdf_file:
-    #     pdf_file.write(response.content)
+    with open("downloaded_report.pdf", "wb") as pdf_file:
+        pdf_file.write(response.content)
 
 
 @cl.action_callback("Initial Assessment")
