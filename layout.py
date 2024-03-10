@@ -1,5 +1,5 @@
 import chainlit as cl
-from backend import healthily, login
+from backend import healthily
 import json
 from fpdf import FPDF
 from backend.utils import get_best_match
