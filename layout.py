@@ -1,7 +1,7 @@
 import chainlit as cl
 from backend import healthily, login
 import json
-
+from backend.utils import get_best_match
 
 
 #Disctionary to define questions
@@ -65,7 +65,7 @@ async def conversation():
 
 async def next_question(response, api):
     global all_ids
-    if response['question']['type'] in ["name","health_background","factor", "symptoms"]:
+    if response['question']['type'] in ["name","health_background","factor", "symptoms", "autocomplete"]:
         question = ' '.join([question['text'] for question in response['question']['messages']])
     else:
         question = ' '.join([question['value'] for question in response['question']['messages']])
@@ -75,7 +75,7 @@ async def next_question(response, api):
         choice_value = 'label'
         if response['question']['type'] == 'health_background':
             choice_value = 'long_name'
-        elif response['question']['type'] in ["factor","symptoms"]:
+        elif response['question']['type'] in ["factor","symptoms", "autocomplete", "symptom"]:
             choice_value = 'text'
         choices = {choice['id']: choice[choice_value] for choice in response['question']['choices']}
         options = ', '.join(choices.values())
@@ -94,9 +94,12 @@ async def next_question(response, api):
         chosen_values = user_input.split(', ')
 
         for choice_value in chosen_values:
-            for a_key in choices.keys():
-                if choices[a_key] == choice_value :
-                    chosen_ids.append(a_key)
+            chosen_value = get_best_match(choice_value,list(choices.values()))
+            if chosen_value:
+                for key,value in choices.items():
+                    if value == chosen_value:
+                        chosen_ids.append(key)
+                        break
         
         for id in all_ids:
             if id not in chosen_ids:
