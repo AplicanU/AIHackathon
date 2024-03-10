@@ -65,7 +65,7 @@ async def conversation():
 
 async def next_question(response, api):
     global all_ids
-    if response['question']['type'] in ["name","health_background","factor", "symptoms", "autocomplete"]:
+    if response['question']['type'] in ["name","health_background","factor", "symptoms", "autocomplete","symptom"]:
         question = ' '.join([question['text'] for question in response['question']['messages']])
     else:
         question = ' '.join([question['value'] for question in response['question']['messages']])
@@ -89,7 +89,18 @@ async def next_question(response, api):
             content="",
             elements=elements,
         ).send()
-        user_response = await  cl.AskUserMessage(content="Select what option(s) apply to you.",).send()
+        if response["conversation"]["phase"] == "autocomplete_add":
+            user_response = await  cl.AskUserMessage(content="",).send()
+            user_input = user_response['output']
+            choices = await api.search(user_input)
+            options = ', '.join(choices.values())
+            elements = [cl.Text(name="Please select which one is the most accurate", content=options, display="inline")]
+            await cl.Message(
+            content="",
+            elements=elements,
+            ).send()
+        else:
+            user_response = await  cl.AskUserMessage(content="Select what option(s) apply to you.",).send()
         user_input = user_response['output']
         chosen_values = user_input.split(', ')
 

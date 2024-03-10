@@ -97,10 +97,12 @@ class HealthilyApi:
         body = await self.http_request(healthily_chat_endpoint, token, body=query, method="POST")
         return body
 
-    async def search(self,query, token):
+    async def search(self,query):
         url = f"{search_endpoint}?text={query}"
-        body = await self.http_request(url, token, method="GET")
-        return body
+        body = await self.http_request(url, self.access_token, method="GET")
+        answers = body["autocomplete"]
+        keys_values = {answer["id"]: answer["user_facing_name"] for answer in answers}
+        return keys_values
 
     def generate_answer_object(self,chosen_ids,not_chosen_ids, answer_type, conversation_id):
         # Some questions have constraints on them as well
