@@ -55,7 +55,7 @@ async def next_question(response, api):
             elements=elements,
         ).send()
         if response["conversation"]["phase"] == "autocomplete_add":
-            user_response = await  cl.AskUserMessage(content="",).send()
+            user_response = await  cl.AskUserMessage(content="",timeout=180).send()
             user_input = user_response['output']
             choices = await api.search(user_input)
             options = ', '.join(choices.values())
@@ -65,7 +65,7 @@ async def next_question(response, api):
             elements=elements,
             ).send()
         else:
-            user_response = await  cl.AskUserMessage(content="Type what option(s) apply to you or enter No",).send()
+            user_response = await  cl.AskUserMessage(content="Type what option(s) apply to you or enter No",timeout=180).send()
         user_input = user_response['output']
         chosen_values = user_input.split(', ')
 
@@ -81,11 +81,11 @@ async def next_question(response, api):
             if id not in chosen_ids:
                 not_chosen_ids.append(id)
 
-        print("All:", all_ids)
-        print("Choosen:", chosen_ids)
-        print("Not Choosen:", not_chosen_ids)
+        #print("All:", all_ids)
+        #print("Choosen:", chosen_ids)
+        #print("Not Choosen:", not_chosen_ids)
     else:
-        user_response = await  cl.AskUserMessage(content=question,).send()
+        user_response = await  cl.AskUserMessage(content=question,timeout=180).send()
     answer_type = response['question']['type']
 
     response = await api.respond_to_healthily(chosen_ids, not_chosen_ids, answer_type)
@@ -123,7 +123,7 @@ async def parse_report(response):
 async def conversation():
     # Iterate over questions
     for key, question in initial_questions.items():
-        answer = await cl.AskUserMessage(content=question).send()
+        answer = await cl.AskUserMessage(content=question,timeout=180).send()
         user_answers[key] = answer['output'] if answer else None
 
     # Storing user answers in variables
@@ -179,12 +179,6 @@ async def download_pdf(action):
 
     # Save the PDF with the filename "report.pdf"
     pdf.output("report.pdf")
-
-    pdf_url = "/report.pdf"
-    response = requests.get(pdf_url)
-
-    with open("downloaded_report.pdf", "wb") as pdf_file:
-        pdf_file.write(response.content)
 
 
 @cl.action_callback("Initial Assessment")
