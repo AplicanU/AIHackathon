@@ -3,6 +3,7 @@ from backend import healthily, login
 import json
 from fpdf import FPDF
 from backend.utils import get_best_match
+import requests
 
 
 #Disctionary to define questions
@@ -110,10 +111,11 @@ async def parse_report(response):
             influencing_factors.append(inf_factor['long_name'])
 
     #show report
-    actions = [
-        cl.Action(name="Download Report", value="Download", label="Download", description="Download Report")
-    ]
     content = "Please find your consultation report below: \n\n Name: " + name + "\n Gender: " + gender + "\n Age: " + str(age) + "\n\n Diagnosis Possible: " + str(diagnosis_possible) + "\n Main Symptoms: " + str(main_symptoms) + "\n Duration of Main Symptoms: " + duration + "\n\n Additional Symptoms: " + str(additional_symptoms) + "\n Unsure Symptoms: " + str(unsure_symptoms) + "\n\n Advice: " + advice + "\n Advice Level: " + advice_level + "\n Influencing Factors: " + str(influencing_factors)
+    actions = [
+        cl.Action(name="Download Report", value=content, label="Download", description="Download Report")
+    ]
+    
     await cl.Message(content=content, actions=actions).send()
 
 
@@ -158,7 +160,7 @@ async def conversation():
        
 
 @cl.action_callback("Download Report")
-async def download_pdf(content):
+async def download_pdf(action):
     # Create an instance of the FPDF class
     pdf = FPDF()
 
@@ -171,11 +173,18 @@ async def download_pdf(content):
     # Insert a cell with the title
     pdf.cell(200, 10, txt="Consultation Report", ln=1, align='C')
 
+    pdf.set_font("Arial", size=12)
     # Insert a cell with the description
-    pdf.cell(200, 10, txt=content, ln=2, align='C')
+    pdf.multi_cell(200, 10, txt=action.value, align='L')
 
-    # Save the PDF with the filename "GFG.pdf"
+    # Save the PDF with the filename "report.pdf"
     pdf.output("report.pdf")
+
+    pdf_url = "/report.pdf"
+    response = requests.get(pdf_url)
+
+    with open("downloaded_report.pdf", "wb") as pdf_file:
+        pdf_file.write(response.content)
 
 
 @cl.action_callback("Initial Assessment")
@@ -195,6 +204,10 @@ async def main():
     await cl.Avatar(
         name="Zenith Care",
         url="public/favicon.png",
+    ).send()
+    await cl.Avatar(
+        name="You",
+        url="public/user_icon.png",
     ).send()
     actions = [
         cl.Action(name="Initial Assessment", value="Agree", label="Agree", description="Agree")
